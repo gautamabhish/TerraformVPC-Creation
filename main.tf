@@ -120,3 +120,50 @@ ami = "ami-053b0d53c279acc90" # Ubuntu 24.04 LTS
 }
 
 
+resource "aws_lb" "practiseELB" {
+  name               = "practise-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.sgTerraform.id]
+  subnets            = [aws_subnet.sub1.id, aws_subnet.sub2.id]
+
+  tags = {
+    Name = "PractiseALB"
+  }
+}
+resource "aws_lb_target_group" "websTG" {
+  name     = "webs-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.practiseVpc.id
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}   
+resource "aws_lb_target_group_attachment" "webs1TG" {
+  target_group_arn = aws_lb_target_group.websTG.arn
+  target_id        = aws_instance.webs1.id
+  port             = 80
+}
+resource "aws_lb_target_group_attachment" "webs2TG" {
+  target_group_arn = aws_lb_target_group.websTG.arn
+  target_id        = aws_instance.webs2.id
+  port             = 80
+}
+
+resource "aws_lb_listener" "Listener" {
+    load_balancer_arn = aws_lb.practiseELB.arn
+    port              = 80
+    protocol          = "HTTP"
+    
+    default_action {
+        type             = "forward"
+        target_group_arn = aws_lb_target_group.websTG.arn
+    }
+  
+}   
