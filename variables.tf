@@ -1,4 +1,4 @@
-variable  "cidr"{
+variable "cidr"{
 
-    default = "10.0.0/12"
+    default = "10.0.0.0/16"
 }
