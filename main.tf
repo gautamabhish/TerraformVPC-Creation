@@ -66,7 +66,13 @@ resource "aws_security_group" "sgTerraform" {
         protocol    = "tcp"
         cidr_blocks = [ "0.0.0.0/0" ]
     }
-    
+    egress {
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
        
   tags = {
     Name = "TerraformSG"
@@ -75,7 +81,7 @@ resource "aws_security_group" "sgTerraform" {
 
 
 resource "aws_s3_bucket" "terraformBucket" {
-  bucket = "terraform-bucket-abhishekGautam-098gh"
+  bucket = "terraformpactiseucketmnbvcxzlkjhgfdsa"
  
   tags = {
     Name        = "TerraformBucket"
@@ -83,30 +89,34 @@ resource "aws_s3_bucket" "terraformBucket" {
   } 
 }
 
-resource "aws_s3_bucket_acl" "aws3BucketACL" {
-  bucket = aws_s3_bucket.terraformBucket.id
-  acl    = "public-read"
-#   depends_on = [ aws_s3_bucket. ]
-  
-}
-
 
 resource "aws_instance" "webs1" {
-  ami = "ami-020cba7c55df1f615"
+#   ami = "ami-020cba7c55df1f615"
+ami = "ami-053b0d53c279acc90" # Ubuntu 24.04 LTS
+
   instance_type = "t2.micro"
   vpc_security_group_ids = [aws_security_group.sgTerraform.id]
     subnet_id = aws_subnet.sub1.id
 
-    user_data_base64 = base64encode(file("data.sh"))
+  user_data                   = file("${path.module}/data.sh")
+
+}
+
+output "file" {
+  value = file("data.sh")
+  
 }
 
 resource "aws_instance" "webs2" {
-  ami = "ami-020cba7c55df1f615"
+#   ami = "ami-020cba7c55df1f615"
+ami = "ami-053b0d53c279acc90" # Ubuntu 24.04 LTS
+
   instance_type = "t2.micro"
   vpc_security_group_ids = [aws_security_group.sgTerraform.id]
     subnet_id = aws_subnet.sub2.id
 
-    user_data_base64 =  base64encode(file("data.sh"))
+    # user_data_base64 =  base64encode(file("data.sh"))
+    user_data                   = file("${path.module}/data.sh")
 }
 
 
